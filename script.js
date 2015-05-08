@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WK Anki Mode
 // @namespace    WKANKIMODE
-// @version      1.0
+// @version      1.a
 // @description  Anki mode for Wanikani
 // @author       Oleg Grishin <og402@nyu.edu>
 // @match        http*://www.wanikani.com/review/session*
@@ -27,6 +27,9 @@
 
 /*
  * Changelog
+ *
+ * 1.1 (9 May 2015)
+ *  - Fixed evaluator bug.
  *
  * 1.0 (9 May 2015)
  *  - First release.
@@ -116,8 +119,6 @@ unsafeWindow.WKANKIMODE_answerYes = function () {
     if (answerShown) {
         answerChecker.evaluate = checkerYes;
         $("#answer-form form button").click();
-        // this is here to not break other scripts, i.e. answer override
-        answerChecker.evaluate = originalChecker;
         answerShown = false;
         return;
     }
@@ -134,8 +135,6 @@ unsafeWindow.WKANKIMODE_answerNo = function () {
     if (answerShown) {
         answerChecker.evaluate = checkerNo;
         $("#answer-form form button").click();
-        // this is here to not break other scripts, i.e. answer override
-        answerChecker.evaluate = originalChecker;
         answerShown = false;
         return;
     }
