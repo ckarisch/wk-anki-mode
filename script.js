@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WK Anki Mode
 // @namespace    WKANKIMODE
-// @version      1.a
+// @version      1.2
 // @description  Anki mode for Wanikani
 // @author       Oleg Grishin <og402@nyu.edu>
 // @match        http*://www.wanikani.com/review/session*
@@ -27,6 +27,9 @@
 
 /*
  * Changelog
+ *
+ * 1.2 (9 May 2015)
+ *  - Fixed multiple kana unexpected behaviour
  *
  * 1.1 (9 May 2015)
  *  - Fixed evaluator bug.
@@ -104,11 +107,11 @@ unsafeWindow.WKANKIMODE_showAnswer = function () {
             $("#user-response").val(answer);
         } else {
             if (currentItem.voc) {
-                $("#user-response").val(currentItem.kana.join(", "));
+                $("#user-response").val(currentItem.kana[0]);
             } else if (currentItem.emph == 'kunyomi') {
-                $("#user-response").val(currentItem.kun.join(", "));
+                $("#user-response").val(currentItem.kun[0]);
             } else {
-                $("#user-response").val(currentItem.on.join(", "));
+                $("#user-response").val(currentItem.on[0]);
             }
         }
         answerShown = true;
@@ -120,6 +123,7 @@ unsafeWindow.WKANKIMODE_answerYes = function () {
         answerChecker.evaluate = checkerYes;
         $("#answer-form form button").click();
         answerShown = false;
+        answerChecker.evaluate = originalChecker;
         return;
     }
 
@@ -136,6 +140,7 @@ unsafeWindow.WKANKIMODE_answerNo = function () {
         answerChecker.evaluate = checkerNo;
         $("#answer-form form button").click();
         answerShown = false;
+        answerChecker.evaluate = originalChecker;
         return;
     }
 
