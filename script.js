@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wanikani Anki Mode
 // @namespace    ckarisch
-// @version      1.8.1
+// @version      1.9
 // @description  Anki mode for Wanikani
 // @author       Christof Karisch
 // @match        https://www.wanikani.com/review/session*
@@ -188,6 +188,29 @@ var WKANKIMODE_answerNo = function() {
 
 /*jshint multistr: true */
 var css = "\
+  #WKANKIMODE_anki_buttongroup { \
+    display: flex; \
+    justify-content: center; \
+  } \
+  @media all and (max-width: 767px) { \
+    #WKANKIMODE_anki_buttongroup { \
+      position: absolute; \
+      bottom: 50px; \
+      width: 100%; \
+    } \
+  } \
+  @media all and (min-width: 768px) { \
+    #WKANKIMODE_anki_correct:after { \
+      content: \"(1)\"; \
+    } \
+    #WKANKIMODE_anki_incorrect:after { \
+      content: \"(2)\"; \
+    } \
+  } \
+  #WKANKIMODE_anki_buttongroup > div { \
+    min-width: 50px; \
+    text-align: center; \
+  } \
   #WKANKIMODE_anki { \
     background-color: #000099; \
     margin: 0 5px; \
@@ -208,50 +231,41 @@ var css = "\
   } \
   .incorrect { \
     background-color: #990000; \
-    min-width: calc(25vw - 10px); \
-    margin: 0 5px !important; \
   } \
   .correct { \
     background-color: #009900; \
-    min-width: calc(25vw - 10px); \
-    margin: 0 5px !important; \
   } \
   .show { \
     background-color: #000099; \
-    min-width: calc(25vw - 10px); \
-    margin: 0 5px !important; \
   } \
   #WKANKIMODE_anki.hidden { \
     display: none; \
   } \
-  #WKANKIMODE_anki_answer { \
-    width: 100%; \
-    height: 100%; \
+  #answer-form input[type=text] { \
+    -webkit-box-shadow: 3px 3px 0 rgba(0,0,0,0.1); \
+    -moz-box-shadow: 3px 3px 0 rgba(0,0,0,0.1); \
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.1); \
+  } \
+  #answer-form input#WKANKIMODE_anki_answer[type=text] { \
     display: block; \
     position: absolute; \
-    left: 0; \
+    left: 10px; \
     top: 50%; \
-    /* background: #f00; */ \
-    -webkit-appearance: none; \
-    border-radius: 0; \
-    display: block; \
     width: 100%; \
-    width: calc(100% - 56px); \
+    width: calc(100% - 66px); \
+    padding: 10px; \
     padding-left: 56px; \
     height: 3em; \
-    font-size: 1.5em; \
     line-height: 3em; \
-    text-align: center; \
-    border: none; \
-    -webkit-box-sizing: border-box; \
-    -moz-box-sizing: border-box; \
-    box-sizing: border-box; \
     transform: translate3d(0, -50%, 0); \
+    -webkit-box-shadow: none; \
+    -moz-box-shadow: none; \
+    box-shadow: none; \
   } \
-  .correct #WKANKIMODE_anki_answer { \
+  #answer-form .correct input#WKANKIMODE_anki_answer[type=text] { \
     background-color: #88cc00; \
   } \
-  .incorrect #WKANKIMODE_anki_answer { \
+  #answer-form .incorrect input#WKANKIMODE_anki_answer[type=text]  { \
     background-color: #f03; \
     color: #fff; \
   } \
@@ -289,13 +303,18 @@ var addButtons = function() {
 
 
   $("<div />", {
+      id: "WKANKIMODE_anki_buttongroup",
+    })
+    .prependTo(".pure-u-1");
+
+  $("<div />", {
       id: "WKANKIMODE_anki_incorrect",
       title: "No",
     })
     .text("Don't know")
     .addClass("WKANKIMODE_button incorrect")
     .on("click", WKANKIMODE_answerNo)
-    .prependTo(".pure-u-1");
+    .prependTo("#WKANKIMODE_anki_buttongroup");
 
   $("<div />", {
       id: "WKANKIMODE_anki_show",
@@ -304,7 +323,7 @@ var addButtons = function() {
     .text("Show")
     .addClass("WKANKIMODE_button show")
     .on("click", WKANKIMODE_showAnswer)
-    .prependTo(".pure-u-1");
+    .prependTo("#WKANKIMODE_anki_buttongroup");
 
   $("<div />", {
       id: "WKANKIMODE_anki_correct",
@@ -313,7 +332,7 @@ var addButtons = function() {
     .text("Know")
     .addClass("WKANKIMODE_button correct")
     .on("click", WKANKIMODE_answerYes)
-    .prependTo(".pure-u-1");
+    .prependTo("#WKANKIMODE_anki_buttongroup");
 
   // TO-DO
   // add physical buttons to press yes/no/show answer
@@ -333,6 +352,7 @@ var addAnswerOverlay = function() {
   $("<input />", {
       id: "WKANKIMODE_anki_answer",
       type: "text",
+      readonly: "readonly",
     })
     .addClass("WKANKIMODE_answer")
     .appendTo("#answer-form fieldset");
