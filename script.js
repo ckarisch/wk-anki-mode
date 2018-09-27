@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wanikani Anki Mode
 // @namespace    ckarisch
-// @version      1.9
+// @version      1.9.1
 // @description  Anki mode for Wanikani
 // @author       Christof Karisch
 // @match        https://www.wanikani.com/review/session*
@@ -187,91 +187,94 @@ var WKANKIMODE_answerNo = function() {
 
 
 /*jshint multistr: true */
-var css = "\
-  #WKANKIMODE_anki_buttongroup { \
-    display: flex; \
-    justify-content: center; \
-  } \
-  @media all and (max-width: 767px) { \
-    #WKANKIMODE_anki_buttongroup { \
-      position: absolute; \
-      bottom: 50px; \
-      width: 100%; \
-    } \
-  } \
-  @media all and (min-width: 768px) { \
-    #WKANKIMODE_anki_correct:after { \
-      content: \"(1)\"; \
-    } \
-    #WKANKIMODE_anki_incorrect:after { \
-      content: \"(2)\"; \
-    } \
-  } \
-  #WKANKIMODE_anki_buttongroup > div { \
-    min-width: 50px; \
-    text-align: center; \
-  } \
-  #WKANKIMODE_anki { \
-    background-color: #000099; \
-    margin: 0 5px; \
-  } \
-  #WKANKIMODE_yes { \
-    background-color: #009900; \
-    margin: 0 0 0 5px; \
-  } \
-  #WKANKIMODE_no { \
-    background-color: #990000; \
-  } \
-  .WKANKIMODE_button { \
-    display: inline-block; \
-    font-size: 0.8125em; \
-    color: #FFFFFF; \
-    cursor: pointer; \
-    padding: 10px; \
-  } \
-  .incorrect { \
-    background-color: #990000; \
-  } \
-  .correct { \
-    background-color: #009900; \
-  } \
-  .show { \
-    background-color: #000099; \
-  } \
-  #WKANKIMODE_anki.hidden { \
-    display: none; \
-  } \
-  #answer-form input[type=text] { \
-    -webkit-box-shadow: 3px 3px 0 rgba(0,0,0,0.1); \
-    -moz-box-shadow: 3px 3px 0 rgba(0,0,0,0.1); \
-    box-shadow: 3px 3px 0 rgba(0,0,0,0.1); \
-  } \
-  #answer-form input#WKANKIMODE_anki_answer[type=text] { \
-    display: block; \
-    position: absolute; \
-    left: 10px; \
-    top: 50%; \
-    width: 100%; \
-    width: calc(100% - 66px); \
-    padding: 10px; \
-    padding-left: 56px; \
-    height: 3em; \
-    line-height: 3em; \
-    transform: translate3d(0, -50%, 0); \
-    -webkit-box-shadow: none; \
-    -moz-box-shadow: none; \
-    box-shadow: none; \
-  } \
-  #answer-form .correct input#WKANKIMODE_anki_answer[type=text] { \
-    background-color: #88cc00; \
-  } \
-  #answer-form .incorrect input#WKANKIMODE_anki_answer[type=text]  { \
-    background-color: #f03; \
-    color: #fff; \
-  } \
-  #answer-form input#WKANKIMODE_anki_answer[type=text].hidden { \
-    display: none; \
-  }";
+var css = `
+  #WKANKIMODE_anki_buttongroup {
+    display: flex;
+    justify-content: center;
+  }
+
+  @media all and (max-width: 767px) {
+    #WKANKIMODE_anki_buttongroup {
+      position: absolute;
+      width: 100%;
+      top: 243px;
+      height: calc(100% - 279px);
+      align-items: center;
+    }
+  }
+  @media all and (min-width: 768px) {
+    #WKANKIMODE_anki_correct:after {
+      content: "(1)";
+    }
+    #WKANKIMODE_anki_incorrect:after {
+      content: "(2)";
+    }
+  }
+  #WKANKIMODE_anki_buttongroup > div {
+    min-width: 50px;
+    text-align: center;
+  }
+  #WKANKIMODE_anki {
+    background-color: #000099;
+    margin: 0 5px;
+  }
+  #WKANKIMODE_yes {
+    background-color: #009900;
+    margin: 0 0 0 5px;
+  }
+  #WKANKIMODE_no {
+    background-color: #990000;
+  }
+  .WKANKIMODE_button {
+    display: inline-block;
+    font-size: 0.8125em;
+    color: #FFFFFF;
+    cursor: pointer;
+    padding: 10px;
+  }
+  .incorrect {
+    background-color: #990000;
+  }
+  .correct {
+    background-color: #009900;
+  }
+  .show {
+    background-color: #000099;
+  }
+  #WKANKIMODE_anki.hidden {
+    display: none;
+  }
+  #answer-form input[type=text] {
+    -webkit-box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+    -moz-box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+  }
+  #answer-form input#WKANKIMODE_anki_answer[type=text] {
+    display: block;
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    width: 100%;
+    width: calc(100% - 66px);
+    padding: 10px;
+    padding-left: 56px;
+    height: 3em;
+    line-height: 3em;
+    transform: translate3d(0, -50%, 0);
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+  }
+  #answer-form .correct input#WKANKIMODE_anki_answer[type=text] {
+    background-color: #88cc00;
+  }
+  #answer-form .incorrect input#WKANKIMODE_anki_answer[type=text]  {
+    background-color: #f03;
+    color: #fff;
+  }
+  #answer-form input#WKANKIMODE_anki_answer[type=text].hidden {
+    display: none;
+  }`;
 
 
 
