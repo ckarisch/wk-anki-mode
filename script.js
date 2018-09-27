@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wanikani Anki Mode
 // @namespace    ckarisch
-// @version      1.7
+// @version      1.8
 // @description  Anki mode for Wanikani
 // @author       Christof Karisch
 // @match        https://www.wanikani.com/review/session*
@@ -121,7 +121,7 @@ var WKANKIMODE_showAnswer = function() {
       var answerArraySyn = currentItem.syn;
       $("#user-response").val(answerArray[0]);
       $("#WKANKIMODE_anki_answer").val(answerArray.join(", ") +
-                                        (answerArraySyn ? " (" + answerArraySyn.join(", ") + ")" : ""));
+                                        (answerArraySyn.length > 0 ? " (" + answerArraySyn.join(", ") + ")" : ""));
     } else { //READING QUESTION
       var i = 0;
       var answerArray = [];
@@ -249,7 +249,11 @@ var css = "\
     transform: translate3d(0, -50%, 0); \
   } \
   .correct #WKANKIMODE_anki_answer { \
-    background-color: #009900; \
+    background-color: #88cc00; \
+  } \
+  .incorrect #WKANKIMODE_anki_answer { \
+    background-color: #f03; \
+    color: #fff; \
   } \
   #WKANKIMODE_anki_answer.hidden { \
     display: none; \
@@ -328,6 +332,7 @@ var addAnswerOverlay = function() {
 
   $("<input />", {
       id: "WKANKIMODE_anki_answer",
+      type: "text",
     })
     .addClass("WKANKIMODE_answer")
     .appendTo("#answer-form fieldset");
