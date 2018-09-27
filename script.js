@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wanikani Anki Mode
 // @namespace    ckarisch
-// @version      1.8
+// @version      1.8.1
 // @description  Anki mode for Wanikani
 // @author       Christof Karisch
 // @match        https://www.wanikani.com/review/session*
@@ -255,7 +255,7 @@ var css = "\
     background-color: #f03; \
     color: #fff; \
   } \
-  #WKANKIMODE_anki_answer.hidden { \
+  #answer-form input#WKANKIMODE_anki_answer[type=text].hidden { \
     display: none; \
   }";
 
