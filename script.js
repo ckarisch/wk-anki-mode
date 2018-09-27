@@ -121,7 +121,7 @@ var WKANKIMODE_showAnswer = function() {
       var answerArraySyn = currentItem.syn;
       $("#user-response").val(answerArray[0]);
       $("#WKANKIMODE_anki_answer").val(answerArray.join(", ") +
-                                        answerArraySyn ? " (" + answerArraySyn.join(", ") + ")" : "");
+                                        (answerArraySyn ? " (" + answerArraySyn.join(", ") + ")" : ""));
     } else { //READING QUESTION
       var i = 0;
       var answerArray = [];
