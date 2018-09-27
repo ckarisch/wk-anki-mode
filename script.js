@@ -1,46 +1,18 @@
 // ==UserScript==
-// @name         WK Anki Mode
-// @namespace    WKANKIMODE
-// @version      1.2
+// @name         Wanikani Anki Mode
+// @namespace    ckarisch
+// @version      1.6
 // @description  Anki mode for Wanikani
-// @author       Oleg Grishin <og402@nyu.edu>
-// @match        http*://www.wanikani.com/review/session*
-// @grant        GM_addStyle
+// @author       Christof Karisch
+// @match        https://www.wanikani.com/review/session*
+// @match        http://www.wanikani.com/review/session*
+// @grant        none
 // @license      GPL version 3 or any later version; http://www.gnu.org/copyleft/gpl.html
 // ==/UserScript==
 
-/*
- * WK Anki Mode
- *
- * Often I get tons of reviews piled up and I have to sift through tons and tons of items
- * that I know very well. It takes a long time to type answers in, and sometimes you
- * mistype things accidentally and get discouraged even more. Thus this script removes
- * the need to type answers and simply display them, and mark them as being correct
- * or wrong. It relies solely on one's ability to be honest with themselves and not cheat.
- *
- * Used the following scripts as a reference:
- * http://userscripts-mirror.org/scripts/review/184992
- * https://greasyfork.org/en/scripts/9224-wk-never-wrong
- * https://greasyfork.org/scripts/723-wanikani-stroke-order/code/WaniKani%20Stroke%20Order.user.js
- * https://userscripts.org/scripts/source/174048.user.js
- */
+//Original author: Oleg Grishin <og402@nyu.edu>, Mempo (edited the original script)
 
-/*
- * Changelog
- *
- * 1.2 (9 May 2015)
- *  - Fixed multiple kana unexpected behaviour
- *
- * 1.1 (9 May 2015)
- *  - Fixed evaluator bug.
- *
- * 1.0 (9 May 2015)
- *  - First release.
- *
- * 0.1 (7 May 2015)
- *  - Started Working On The script.
- *
- */
+console.log('/// Start of Wanikani Anki Mode');
 
 
 // Save the original evaluator
@@ -57,8 +29,9 @@ var checkerNo = function (itemType, correctValue) {
 var activated = false;
 var answerShown = false;
 
-// For jStorage
-$ = unsafeWindow.$;
+//AUTOSTART
+var autostart = false;
+
 
 MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
@@ -66,22 +39,58 @@ var observer = new MutationObserver(function(mutations, observer) {
     $("#user-response").blur();
 });
 
-unsafeWindow.WKANKIMODE_toggle = function () {
+ var WKANKIMODE_toggle = function () {
+
     if (activated) {
-        $("#WKANKIMODE_anki").text("Anki Mode");
-        $("#answer-form form button").prop("disabled", false);
-        $("#user-response").off("focus");
-        $("#user-response").focus();
-        activated = false;
-        answerChecker.evaluate = originalChecker;
-        observer.disconnect();
+        if(autostart){
+            //DISABLE ANKI MODE
+            $("#WKANKIMODE_anki").text("Anki Mode Off");
+            $("#answer-form form button").prop("disabled", false);
+            $("#user-response").off("focus");
+            $("#user-response").focus();
+
+            answerChecker.evaluate = originalChecker;
+            observer.disconnect();
+
+            localStorage.setItem("WKANKI_autostart", false);
+            activated = false;
+            autostart = false;
+            $("#WKANKIMODE_anki_answer").addClass("hidden");
+            console.log("back to #1");
+
+
+        }else{
+            //ENABLE AUTOSTART
+            activated = true;
+            autostart = true;
+            localStorage.setItem("WKANKI_autostart", true);
+
+            $("#WKANKIMODE_anki").text("Anki Mode Auto Start");
+
+            // start observer to force blur
+            observer.observe(document.getElementById("answer-form"), {
+                childList: true,
+                subtree: true,
+                attributes: true,
+                characterData: false
+            });
+
+            $("#WKANKIMODE_anki_answer").removeClass("hidden");
+        }
+
+
+
+
+
     } else {
-        $("#WKANKIMODE_anki").text("Switch anki mode off");
+        //ENABLE ANKI MODE
+        $("#WKANKIMODE_anki").text("Anki Mode On");
         $("#answer-form form button").prop("disabled", true);
         $("#user-response").on("focus", function () {
             $("#user-response").blur();
         });
         activated = true;
+        autostart = false;
         // start observer to force blur
         observer.observe(document.getElementById("answer-form"), {
             childList: true,
@@ -89,11 +98,13 @@ unsafeWindow.WKANKIMODE_toggle = function () {
             attributes: true,
             characterData: false
         });
+        
+        $("#WKANKIMODE_anki_answer").removeClass("hidden");
     }
 
 }
 
-unsafeWindow.WKANKIMODE_showAnswer = function () {
+ var WKANKIMODE_showAnswer = function () {
     if (!$("#answer-form form fieldset").hasClass("correct") &&
         !$("#answer-form form fieldset").hasClass("incorrect") &&
         !answerShown ) {
@@ -105,20 +116,34 @@ unsafeWindow.WKANKIMODE_showAnswer = function () {
                 answer += " (" + currentItem.syn.join(", ") + ")";
             }
             $("#user-response").val(answer);
-        } else {
+        } else { //READING QUESTION
+            var i = 0;
+            var answerArray = [];
             if (currentItem.voc) {
-                $("#user-response").val(currentItem.kana[0]);
+                for(i=0;i<(currentItem.kana.length);i++){
+                    answerArray.push(currentItem.kana[i]);
+                }
             } else if (currentItem.emph == 'kunyomi') {
-                $("#user-response").val(currentItem.kun[0]);
+                for(i=0;i<(currentItem.kun.length);i++){
+                    answerArray.push(currentItem.kana[i]);
+                }
+            } else if (currentItem.emph == 'nanori') {
+                for(i=0;i<(currentItem.nanori.length);i++){
+                    answerArray.push(currentItem.kana[i]);
+                }
             } else {
-                $("#user-response").val(currentItem.on[0]);
+                for(i=0;i<(currentItem.on.length - 1);i++){
+                    answerArray.push(currentItem.kana[i]);
+                }
             }
+            $("#user-response").val(answerArray[0]);
+            $("#WKANKIMODE_anki_answer").val(answerArray.join());
         }
         answerShown = true;
     }
 };
 
-unsafeWindow.WKANKIMODE_answerYes = function () {
+ var WKANKIMODE_answerYes = function () {
     if (answerShown) {
         answerChecker.evaluate = checkerYes;
         $("#answer-form form button").click();
@@ -135,7 +160,7 @@ unsafeWindow.WKANKIMODE_answerYes = function () {
 
 };
 
-unsafeWindow.WKANKIMODE_answerNo = function () {
+var WKANKIMODE_answerNo = function () {
     if (answerShown) {
         answerChecker.evaluate = checkerNo;
         $("#answer-form form button").click();
@@ -151,9 +176,9 @@ unsafeWindow.WKANKIMODE_answerNo = function () {
 
 };
 
-var loadCSS = function () {
+
     /*jshint multistr: true */
-    GM_addStyle("\
+    var css = "\
         #WKANKIMODE_anki { \
             background-color: #000099; \
             margin: 0 5px; \
@@ -172,22 +197,107 @@ var loadCSS = function () {
             cursor: pointer; \
             padding: 10px; \
         } \
-        #WKANKIMODE_anki.hidden { \
-            display: none; \
+        .incorrect { \
+            background-color: #990000; \
+            min-width: calc(25vw - 10px); \
+            margin: 0 5px !important; \
         } \
-    ");
-};
+    .correct { \
+            background-color: #009900; \
+            min-width: calc(25vw - 10px); \
+            margin: 0 5px !important; \
+        } \
+    .show { \
+        background-color: #000099; \
+        min-width: calc(25vw - 10px); \
+        margin: 0 5px !important; \
+        } \
+    #WKANKIMODE_anki.hidden { \
+        display: none; \
+      } \
+    #WKANKIMODE_anki_answer { \
+        width: 100%; \
+        height: 100%; \
+        display: block; \
+        position: absolute; \
+        left: 0; \
+        top: 50%; \
+        /* background: #f00; */ \
+        -webkit-appearance: none; \
+        border-radius: 0; \
+        display: block; \
+        width: 100%; \
+        width: calc(100% - 56px); \
+        padding-left: 56px; \
+        height: 3em; \
+        font-size: 1.5em; \
+        line-height: 3em; \
+        text-align: center; \
+        border: none; \
+        -webkit-box-sizing: border-box; \
+        -moz-box-sizing: border-box; \
+        box-sizing: border-box; \
+        transform: translate3d(0, -50%, 0); \
+      } \
+      #WKANKIMODE_anki_answer.hidden { \
+          display: none; \
+        }";
+
+
+
+function addStyle(aCss) {
+  var head, style;
+  head = document.getElementsByTagName('head')[0];
+  if (head) {
+    style = document.createElement('style');
+    style.setAttribute('type', 'text/css');
+    style.textContent = aCss;
+    head.appendChild(style);
+    return style;
+  }
+  return null;
+}
 
 var addButtons = function () {
+    //CHECK AUTOSTART
+    autostart = localStorage.getItem('WKANKI_autostart')==="true"?true:false;
 
     $("<div />", {
                 id : "WKANKIMODE_anki",
                 title : "Anki Mode",
     })
-    .text("Anki Mode")
+    .text("Anki Mode Off")
     .addClass("WKANKIMODE_button")
     .on("click", WKANKIMODE_toggle)
     .prependTo("footer");
+
+
+     $("<div />", {
+                id : "WKANKIMODE_anki_incorrect",
+                title : "No",
+    })
+    .text("Don't know")
+    .addClass("WKANKIMODE_button incorrect")
+    .on("click", WKANKIMODE_answerNo)
+    .prependTo(".pure-u-1");
+
+        $("<div />", {
+                id : "WKANKIMODE_anki_show",
+                title : "Show",
+    })
+    .text("Show")
+    .addClass("WKANKIMODE_button show")
+    .on("click", WKANKIMODE_showAnswer)
+    .prependTo(".pure-u-1");
+
+$("<div />", {
+                id : "WKANKIMODE_anki_correct",
+                title : "Yes",
+    })
+    .text("Know")
+    .addClass("WKANKIMODE_button correct")
+    .on("click", WKANKIMODE_answerYes)
+    .prependTo(".pure-u-1");
 
     // TO-DO
     // add physical buttons to press yes/no/show answer
@@ -200,6 +310,37 @@ var addButtons = function () {
 
 };
 
+
+
+var addAnswerOverlay = function () {
+
+    $("<input />", {
+                id : "WKANKIMODE_anki_answer",
+    })
+    .addClass("WKANKIMODE_answer")
+    .appendTo("#answer-form fieldset");
+
+};
+
+var autostartFeature = function() {
+    console.log("///////////// AUTOSTART: " + autostart);
+    if(autostart){
+        $("#WKANKIMODE_anki").text("Anki Mode Auto Start");
+        $("#answer-form form button").prop("disabled", true);
+        $("#user-response").on("focus", function () {
+            $("#user-response").blur();
+        });
+        activated = true;
+        // start observer to force blur
+        observer.observe(document.getElementById("answer-form"), {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            characterData: false
+        });
+    }
+}
+
 var bindHotkeys = function () {
     $(document).on("keydown.reviewScreen", function (event)
         {
@@ -211,7 +352,7 @@ var bindHotkeys = function () {
                         event.preventDefault();
 
                         if (activated)
-                            unsafeWindow.WKANKIMODE_showAnswer();
+                            WKANKIMODE_showAnswer();
 
                         return;
                         break;
@@ -220,7 +361,7 @@ var bindHotkeys = function () {
                         event.preventDefault();
 
                         if (activated)
-                            unsafeWindow.WKANKIMODE_answerYes();
+                            WKANKIMODE_answerYes();
 
                         return;
                         break;
@@ -230,7 +371,7 @@ var bindHotkeys = function () {
                         event.preventDefault();
 
                         if (activated)
-                            unsafeWindow.WKANKIMODE_answerNo();
+                            WKANKIMODE_answerNo();
 
                         return;
                         break;
@@ -239,13 +380,9 @@ var bindHotkeys = function () {
         });
 };
 
-var init = function () {
-    loadCSS();
-    addButtons();
-    bindHotkeys();
-};
 
-// Init the script
-$(function(){
-    init();
-});
+addStyle(css);
+addButtons();
+addAnswerOverlay();
+autostartFeature();
+bindHotkeys();
