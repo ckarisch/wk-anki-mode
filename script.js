@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wanikani Anki Mode
 // @namespace    ckarisch
-// @version      1.6
+// @version      1.7
 // @description  Anki mode for Wanikani
 // @author       Christof Karisch
 // @match        https://www.wanikani.com/review/session*
@@ -117,14 +117,15 @@ var WKANKIMODE_showAnswer = function() {
     var currentItem = $.jStorage.get("currentItem");
     var questionType = $.jStorage.get("questionType");
     if (questionType === "meaning") {
-      var answer = currentItem.en.join(", ");
-      if (currentItem.syn.length) {
-        answer += " (" + currentItem.syn.join(", ") + ")";
-      }
-      $("#user-response").val(answer);
+      var answerArray = currentItem.en;
+      var answerArraySyn = currentItem.syn;
+      $("#user-response").val(answerArray[0]);
+      $("#WKANKIMODE_anki_answer").val(answerArray.join(", ") +
+                                        answerArraySyn ? " (" + answerArraySyn.join(", ") + ")" : "");
     } else { //READING QUESTION
       var i = 0;
       var answerArray = [];
+      var answerArraySyn = [];
       if (currentItem.voc) {
         for (i = 0; i < (currentItem.kana.length); i++) {
           answerArray.push(currentItem.kana[i]);
@@ -138,12 +139,12 @@ var WKANKIMODE_showAnswer = function() {
           answerArray.push(currentItem.nanori[i]);
         }
       } else {
-        for (i = 0; i < (currentItem.on.length - 1); i++) {
+        for (i = 0; i < (currentItem.on.length); i++) {
           answerArray.push(currentItem.on[i]);
         }
       }
       $("#user-response").val(answerArray[0]);
-      $("#WKANKIMODE_anki_answer").val(answerArray.join());
+      $("#WKANKIMODE_anki_answer").val(answerArray.join(", "));
     }
     answerShown = true;
   }
