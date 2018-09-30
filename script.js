@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wanikani Anki Mode
 // @namespace    ckarisch
-// @version      1.9.1
+// @version      1.10.1
 // @description  Anki mode for Wanikani
 // @author       Christof Karisch
 // @match        https://www.wanikani.com/review/session*
@@ -222,6 +222,8 @@
     //CHECK AUTOSTART
     autostart = localStorage.getItem('WKANKI_autostart') === "true" ? true : false;
 
+    let buttonTop = "margin-top: " + localStorage.getItem("buttonOffsetTop") + "px;";
+
     $("<div />", {
         id: "WKANKIMODE_anki",
         title: "Anki Mode",
@@ -240,6 +242,7 @@
     $("<div />", {
         id: "WKANKIMODE_anki_incorrect",
         title: "No",
+        style: buttonTop,
       })
       .text("Don't know")
       .addClass("WKANKIMODE_button incorrect")
@@ -249,6 +252,7 @@
     $("<div />", {
         id: "WKANKIMODE_anki_show",
         title: "Show",
+        style: buttonTop,
       })
       .text("Show")
       .addClass("WKANKIMODE_button show")
@@ -258,11 +262,16 @@
     $("<div />", {
         id: "WKANKIMODE_anki_correct",
         title: "Yes",
+        style: buttonTop,
       })
       .text("Know")
       .addClass("WKANKIMODE_button correct")
       .on("click", WKANKIMODE_answerYes)
       .prependTo("#WKANKIMODE_anki_buttongroup");
+
+      $("#WKANKIMODE_anki_buttongroup div").each(function(){
+        $(this).css("margin-top", localStorage.getItem("buttonOffsetTop"));
+      });
   };
 
 
@@ -326,8 +335,8 @@
   var bindMove = function() {
     let thumb = document.querySelector('#WKANKIMODE_anki_buttongroup');
     let divs = $('#WKANKIMODE_anki_buttongroup div');
+console.log(localStorage.getItem("buttonOffsetTop"));
 
-    divs.each(function(){$(this).css("margin-top", localStorage.getItem("buttonOffsetTop"));});
 
     thumb.onmousedown = function(event) {
       event.preventDefault(); // prevent selection start (browser action)
@@ -352,7 +361,9 @@
 
         divs.each(function(){$(this).css("margin-top", newTop);});
         clearTimeout(buttonOffsetTopTimeout);
-        buttonOffsetTopTimeout = setTimeout(function(){ localStorage.setItem("buttonOffsetTop", newTop); }, 300);
+        buttonOffsetTopTimeout = setTimeout(function(){
+          console.log("save");
+          localStorage.setItem("buttonOffsetTop", newTop); }, 300);
 
       }
 
