@@ -20,6 +20,9 @@
   #WKANKIMODE_anki_incorrect:after {
     content: "(2)";
   }
+  #WKANKIMODE_anki_buttongroup>div {
+    margin-top: 0 !important;
+  }
 }
 
 #WKANKIMODE_anki_buttongroup>div {
