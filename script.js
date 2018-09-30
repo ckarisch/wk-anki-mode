@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wanikani Anki Mode
 // @namespace    ckarisch
-// @version      1.10.1
+// @version      1.10.2
 // @description  Anki mode for Wanikani
 // @author       Christof Karisch
 // @match        https://www.wanikani.com/review/session*
@@ -269,9 +269,9 @@
       .on("click", WKANKIMODE_answerYes)
       .prependTo("#WKANKIMODE_anki_buttongroup");
 
-      $("#WKANKIMODE_anki_buttongroup div").each(function(){
-        $(this).css("margin-top", localStorage.getItem("buttonOffsetTop"));
-      });
+    $("#WKANKIMODE_anki_buttongroup div").each(function() {
+      $(this).css("margin-top", localStorage.getItem("buttonOffsetTop"));
+    });
   };
 
 
@@ -335,7 +335,7 @@
   var bindMove = function() {
     let thumb = document.querySelector('#WKANKIMODE_anki_buttongroup');
     let divs = $('#WKANKIMODE_anki_buttongroup div');
-console.log(localStorage.getItem("buttonOffsetTop"));
+    console.log(localStorage.getItem("buttonOffsetTop"));
 
 
     thumb.onmousedown = function(event) {
@@ -346,6 +346,8 @@ console.log(localStorage.getItem("buttonOffsetTop"));
 
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
+      document.addEventListener('touchmove', onMouseMove);
+      document.addEventListener('touchend', onMouseUp);
 
       function onMouseMove(event) {
         let newTop = event.clientY - shiftY - thumb.getBoundingClientRect().top;
@@ -359,17 +361,22 @@ console.log(localStorage.getItem("buttonOffsetTop"));
           newTop = bottomEdge;
         }
 
-        divs.each(function(){$(this).css("margin-top", newTop);});
+        divs.each(function() {
+          $(this).css("margin-top", newTop);
+        });
         clearTimeout(buttonOffsetTopTimeout);
-        buttonOffsetTopTimeout = setTimeout(function(){
+        buttonOffsetTopTimeout = setTimeout(function() {
           console.log("save");
-          localStorage.setItem("buttonOffsetTop", newTop); }, 300);
+          localStorage.setItem("buttonOffsetTop", newTop);
+        }, 300);
 
       }
 
       function onMouseUp() {
         document.removeEventListener('mouseup', onMouseUp);
         document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('touchend', onMouseUp);
+        document.removeEventListener('touchmove', onMouseMove);
       }
 
     };
