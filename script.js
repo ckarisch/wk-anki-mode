@@ -213,6 +213,7 @@ var css = `
   #WKANKIMODE_anki_buttongroup > div {
     min-width: 50px;
     text-align: center;
+    user-select: none;
   }
   #WKANKIMODE_anki {
     background-color: #000099;
