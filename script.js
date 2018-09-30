@@ -18,7 +18,7 @@
   // Initialization of the Wanikani Open Framework.
   //-------------------------------------------------------------------
   var script_name = 'Wanikani Anki Mode';
-  var wkof_version_needed = '1.9.1';
+  var wkof_version_needed = '1.0.27';
   if (!window.wkof) {
     if (confirm(script_name + ' requires Wanikani Open Framework.\nDo you want to be forwarded to the installation instructions?'))
       window.location.href = 'https://community.wanikani.com/t/instructions-installing-wanikani-open-framework/28549';
@@ -31,7 +31,7 @@
   }
 
   wkof.include('ItemData, Settings');
-  wkof.ready('document,ItemData,Settings').then(load_settings).then(startup);
+  wkof.ready('document,ItemData,Settings').then(startup);
   //===================================================================
 
   console.log('/// Start of Wanikani Anki Mode');
@@ -316,6 +316,4 @@
       }
     });
   };
-
-  startup();
 })(window);
