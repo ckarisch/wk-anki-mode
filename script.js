@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wanikani Anki Mode
 // @namespace    ckarisch
-// @version      1.10
+// @version      1.9.1
 // @description  Anki mode for Wanikani
 // @author       Christof Karisch
 // @match        https://www.wanikani.com/review/session*
@@ -35,6 +35,8 @@
   //===================================================================
 
   console.log('/// Start of Wanikani Anki Mode');
+  let buttonOffsetTopTimeout;
+
   // Save the original evaluator
   var originalChecker = answerChecker.evaluate;
 
@@ -70,10 +72,13 @@
   //-------------------------------------------------------------------
   function startup() {
     wkof.load_css("https://raw.githubusercontent.com/ckarisch/wk-anki-mode/master/styles.css", true);
+
+
     addButtons();
     addAnswerOverlay();
     autostartFeature();
     bindHotkeys();
+    bindMove();
   }
 
 
@@ -316,5 +321,50 @@
         }
       }
     });
+  };
+
+  var bindMove = function() {
+    let thumb = document.querySelector('#WKANKIMODE_anki_buttongroup');
+    let divs = $('#WKANKIMODE_anki_buttongroup div');
+
+    divs.each(function(){$(this).css("margin-top", localStorage.getItem("buttonOffsetTop"));});
+
+    thumb.onmousedown = function(event) {
+      event.preventDefault(); // prevent selection start (browser action)
+
+      let shiftY = event.clientY - divs.get(0).getBoundingClientRect().top;
+      // shiftY not needed, the thumb moves only horizontally
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+
+      function onMouseMove(event) {
+        let newTop = event.clientY - shiftY - thumb.getBoundingClientRect().top;
+
+        // the pointer is out of slider => lock the thumb within the bounaries
+        if (newTop < 0) {
+          newTop = 0;
+        }
+        let bottomEdge = thumb.offsetHeight - divs.get(0).offsetHeight;
+        if (newTop > bottomEdge) {
+          newTop = bottomEdge;
+        }
+
+        divs.each(function(){$(this).css("margin-top", newTop);});
+        clearTimeout(buttonOffsetTopTimeout);
+        buttonOffsetTopTimeout = setTimeout(function(){ localStorage.setItem("buttonOffsetTop", newTop); }, 300);
+
+      }
+
+      function onMouseUp() {
+        document.removeEventListener('mouseup', onMouseUp);
+        document.removeEventListener('mousemove', onMouseMove);
+      }
+
+    };
+
+    thumb.ondragstart = function() {
+      return false;
+    };
   };
 })(window);

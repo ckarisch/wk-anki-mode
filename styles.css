@@ -9,7 +9,7 @@
     width: 100%;
     top: 243px;
     height: calc(100% - 279px);
-    align-items: center;
+    align-items: flex-start;
   }
 }
 
