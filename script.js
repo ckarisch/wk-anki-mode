@@ -147,18 +147,19 @@
     if (!$("#answer-form form fieldset").hasClass("correct") &&
       !$("#answer-form form fieldset").hasClass("incorrect") &&
       !answerShown) {
+      var i = 0;
+      var answerArray = [];
+      var answerArraySyn = [];
       var currentItem = $.jStorage.get("currentItem");
       var questionType = $.jStorage.get("questionType");
+
       if (questionType === "meaning") {
-        var answerArray = currentItem.en;
-        var answerArraySyn = currentItem.syn;
+        answerArray = currentItem.en;
+        answerArraySyn = currentItem.syn;
         $("#user-response").val(answerArray[0]);
         $("#WKANKIMODE_anki_answer").val(answerArray.join(", ") +
           (answerArraySyn.length > 0 ? " (" + answerArraySyn.join(", ") + ")" : ""));
       } else { //READING QUESTION
-        var i = 0;
-        var answerArray = [];
-        var answerArraySyn = [];
         if (currentItem.voc) {
           for (i = 0; i < (currentItem.kana.length); i++) {
             answerArray.push(currentItem.kana[i]);
@@ -222,7 +223,7 @@
     //CHECK AUTOSTART
     autostart = localStorage.getItem('WKANKI_autostart') === "true" ? true : false;
 
-    let buttonTop = "margin-top: " + localStorage.getItem("buttonOffsetTop") + "px;";
+    let buttonTop = "margin-top: " + (localStorage.getItem("buttonOffsetTop") ? localStorage.getItem("buttonOffsetTop") + "px;" : "calc(50% - 63px);");
 
     $("<div />", {
         id: "WKANKIMODE_anki",
@@ -332,16 +333,30 @@
     });
   };
 
+  let getPoint = function(event) {
+    let point = {};
+    if (event.changedTouches[0]) {
+      point.y = event.changedTouches[0].pageY;
+      point.x = event.changedTouches[0].pageX;
+    } else {
+      point.y = event.clientY;
+      point.x = event.clientX;
+    }
+    return point;
+  }
+
   var bindMove = function() {
     let thumb = document.querySelector('#WKANKIMODE_anki_buttongroup');
     let divs = $('#WKANKIMODE_anki_buttongroup div');
-    console.log(localStorage.getItem("buttonOffsetTop"));
+    //console.log(localStorage.getItem("buttonOffsetTop"));
 
 
-    thumb.onmousedown = function(event) {
+    let touchfunction = function(event) {
+      let point = getPoint(event);
+
       event.preventDefault(); // prevent selection start (browser action)
 
-      let shiftY = event.clientY - divs.get(0).getBoundingClientRect().top;
+      let shiftY = point.y - divs.get(0).getBoundingClientRect().top;
       // shiftY not needed, the thumb moves only horizontally
 
       document.addEventListener('mousemove', onMouseMove);
@@ -350,7 +365,9 @@
       document.addEventListener('touchend', onMouseUp);
 
       function onMouseMove(event) {
-        let newTop = event.clientY - shiftY - thumb.getBoundingClientRect().top;
+        let point = getPoint(event);
+
+        let newTop = point.y - shiftY - thumb.getBoundingClientRect().top;
 
         // the pointer is out of slider => lock the thumb within the bounaries
         if (newTop < 0) {
@@ -366,7 +383,6 @@
         });
         clearTimeout(buttonOffsetTopTimeout);
         buttonOffsetTopTimeout = setTimeout(function() {
-          console.log("save");
           localStorage.setItem("buttonOffsetTop", newTop);
         }, 300);
 
@@ -380,6 +396,9 @@
       }
 
     };
+
+    thumb.onmousedown = touchfunction;
+    thumb.ontouchstart = touchfunction;
 
     thumb.ondragstart = function() {
       return false;
