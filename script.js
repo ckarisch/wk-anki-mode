@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wanikani Anki Mode
 // @namespace    ckarisch
-// @version      1.10.3
+// @version      1.10.4
 // @description  Anki mode for Wanikani
 // @author       Christof Karisch
 // @match        https://www.wanikani.com/review/session*
@@ -335,7 +335,7 @@
 
   let getPoint = function(event) {
     let point = {};
-    if (event.changedTouches[0]) {
+    if (event.changedTouches) {
       point.y = event.changedTouches[0].pageY;
       point.x = event.changedTouches[0].pageX;
     } else {
@@ -354,7 +354,7 @@
     let touchfunction = function(event) {
       let point = getPoint(event);
 
-      event.preventDefault(); // prevent selection start (browser action)
+      //event.preventDefault(); // prevent selection start (browser action)
 
       let shiftY = point.y - divs.get(0).getBoundingClientRect().top;
       // shiftY not needed, the thumb moves only horizontally
